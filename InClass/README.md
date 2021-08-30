@@ -12,6 +12,7 @@ For breakfast today I ate:
 1) Scrambled eggs
 2) Fried bacon
 3) Earl Grey Tea
+4) Water
 
 1. Using your terminal or GitHub Desktop, add and commit the changes you've made to your repository
 
