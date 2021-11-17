@@ -1,0 +1,85 @@
+---
+title: "R Notebook"
+author: "Joshua Boehm & Aneeka Khan"
+date: "16 of November, 2021"
+output: html_notebook
+---
+
+The United States Department of Energy digitized most to all of the data they collect as a part of the Energy Information Administration.
+
+```{r}
+# If you need to install any of the packages below, un-comment the line(s) you need.
+# install.packages("httr")
+# install.packages("dplyr")
+# install.packages("dslabs")
+# install.packages("tidyverse")
+# install.packages("readxl")
+
+
+library(readxl)
+library(httr)
+library(dplyr)
+library(dslabs)
+library(tidyverse)
+```
+
+The following data is the annual electricity generation by state, sorted into each sector.
+
+We can ask quite a few questions here about whatever we want. There are also tons and tons more csv's that are all relatively tidy to evaluate and talk about.
+If you think of any, just add them on here or post them in the groupme and we can work remotely, together, even when we can't do it over Zoom or in person.
+
+The following information is the annual generation by state by energy source by sector.
+```{r}
+# Imports raw data from EIA
+gen_annual <- read.csv("generation annual by state.csv")
+
+# Renames columns to easier-to-type names
+gen_annual <- gen_annual %>% rename(year = YEAR, state = STATE_CODE, sector = SECTOR_NAME, source = ENERGY_SOURCE, generation_mw = GENERATION....Megawatthours.)
+
+# Converts the raw character figures to integers without commas to utilize in data viz
+gen_annual$generation_mw <- as.numeric(gsub(",","",gen_annual$generation_mw))
+```
+
+This information is the sales to the ultimate customers by state by sector by provider from 1990-2020.
+```{r}
+
+# Imports raw data from EIA
+sales_to_ultimate_customers <- read.csv("Sales to Ultimate Customers (Megawatthours) by State by Sector by Provider, 1990-2020.csv", header = TRUE)
+
+
+# Converts the raw character figures to integers without commas to utilize in data viz
+sales_to_ultimate_customers$Residential <-  as.numeric(gsub(",","",sales_to_ultimate_customers$Residential))
+sales_to_ultimate_customers$Commercial <-  as.numeric(gsub(",","",sales_to_ultimate_customers$Commercial))
+sales_to_ultimate_customers$Industrial <-  as.numeric(gsub(",","",sales_to_ultimate_customers$Industrial))
+sales_to_ultimate_customers$Other <- gsub(",","",sales_to_ultimate_customers$Other)
+sales_to_ultimate_customers$Other <- as.numeric(sales_to_ultimate_customers$Other)
+sales_to_ultimate_customers$Total <-  as.numeric(gsub(",","",sales_to_ultimate_customers$Total))
+
+
+# Finds which Industry Sectors have available data
+unique(sales_to_ultimate_customers["Industry.Sector.Category"])
+
+# Begin visualization
+sales_to_ultimate_customers %>% filter(State == "TX") %>% ggplot() + geom_line(aes(x = Year, y = Residential, group = Industry.Sector.Category))
+
+
+```
+
+
+```{r}
+gen_annual %>% filter(state == "TX", year >= 2005) %>% group_by(source) %>% ggplot(aes(x = year, y = generation_mw)) + scale_x_log10() + geom_line(aes(color = sector, fill = sector)) + facet_wrap(~ source)
+```
+
+```{r}
+prim_energy_prod <- read.csv("MER_Primary energy production by source.csv")
+unique(prim_energy_prod["Description"])
+
+prim_energy_prod %>% filter(Description == "Wind Energy Production", YYYYMM >= 198001) %>% ggplot() + geom_line(aes(x=YYYYMM, y=Value))
+```
+
+```{r}
+
+```
+
+
+lubridate // YM look it up
